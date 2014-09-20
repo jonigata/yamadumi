@@ -5,9 +5,11 @@
 #include "screen.hpp"
 #include "mqoreader.hpp"
 #include "figure.hpp"
+#include "jslib.hpp"
 #include "texture.hpp"
 
 void start(int argc, const char *argv[]) {
+    initMouse();
     initTextureVault();
 
     Screen screen(argc, argv, "yamadumi");

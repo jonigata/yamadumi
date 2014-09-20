@@ -270,6 +270,27 @@ look_at_lh(const Vector& camera_position,
 }
 
 inline Matrix
+look_at_rh(const Vector& camera_position,
+            const Vector& camera_target,
+            const Vector& camera_up)
+{
+    Vector zaxis = normalize(camera_position - camera_target);
+    Vector xaxis = normalize(cross(camera_up, zaxis));
+    Vector yaxis = cross(zaxis, xaxis);
+
+    Matrix m;
+    m.m00 = xaxis.x;  m.m01 = yaxis.x;  m.m02 = zaxis.x;  m.m03 = 0;
+    m.m10 = xaxis.y;  m.m11 = yaxis.y;  m.m12 = zaxis.y;  m.m13 = 0;
+    m.m20 = xaxis.z;  m.m21 = yaxis.z;  m.m22 = zaxis.z;  m.m23 = 0;
+    m.m30 = -dot(xaxis, camera_position);
+    m.m31 = -dot(yaxis, camera_position);
+    m.m32 = -dot(zaxis, camera_position);
+    m.m33 = 1;
+
+    return m;
+}
+
+inline Matrix
 perspective_fov_lh(
     float fovy,
     float aspect,

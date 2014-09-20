@@ -11,6 +11,8 @@
 #include "geometry.hpp"
 #include "shader.hpp"
 #include "bg.hpp"
+#include "mouse_dispatcher.hpp"
+#include "camera.hpp"
 
 static ScreenImp* imp_ = nullptr;
 
@@ -26,10 +28,40 @@ public:
     ScreenImp(int argc, const char** argv, const char* title)
         :
         LightSourcePosition_ {5.0, 5.0, 10.0, 1.0},
-        view_rot_ { 20.0, 30.0, 0.0 }
-    {
+        view_rot_ { 20.0, 30.0, 0.0 } {
+
         init(argc, argv, title);
         bg_ = std::make_shared<BG>();
+
+        mouse_dispatcher_.add_acceptor(&camera_, 0);
+    }
+
+    ~ScreenImp() {
+        mouse_dispatcher_.remove_acceptor(&camera_);
+    }
+
+    void on_mouse(int which, int kind, int x, int y) {
+        bool* b = nullptr;
+        switch(which) {
+            case 1: b = &mouse_state_.lbutton; break;
+            case 2: b = &mouse_state_.mbutton; break;
+            case 3: b = &mouse_state_.rbutton; break;
+        }
+
+        switch(kind) {
+            case 0:
+                if (b) {
+                    *b = true;
+                }
+                break;
+            case 2:
+                if (b) {
+                    *b = false;
+                }
+                break;
+        }
+        mouse_state_.position = Point(x, y);
+        mouse_dispatcher_.on_mouse_message(mouse_state_);
     }
 
     void on_idle(std::function<void (float)> f) {
@@ -99,23 +131,34 @@ public:
     }
 
     void draw() {
-        Matrix transform = Matrix::identity();
-
         glClearColor(0.0, 0.0, 0.0, 0.0);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         //glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 
         draw_bg();
 
-        /* Translate and rotate the view */
+        // view matrix
+        Vector view_point = camera_.make_view_point();
+        Vector focal_point = camera_.make_focal_point();
+        Matrix view = look_at_rh(
+            view_point,
+            focal_point,
+            Vector(0, 1, 0));
+        Matrix transform = Matrix::identity();
         transform *= Matrix::translate(0, -10, -40);
         transform *= Matrix::rotate(2 * M_PI * view_rot_[0] / 360.0, 1, 0, 0);
         transform *= Matrix::rotate(2 * M_PI * view_rot_[1] / 360.0, 0, 1, 0);
         transform *= Matrix::rotate(2 * M_PI * view_rot_[2] / 360.0, 0, 0, 1);
 
+        //printf("%f, %f, %f\n", view_point.x, view_point.y, view_point.z);
+        //printf("%f, %f, %f\n", focal_point.x, focal_point.y, focal_point.z);
+
+        //transform *= Matrix::translate(0, -10, -40);
+
         /* Draw the shapes */
         for(shape_ptr& p : shapes_) {
-            draw_shape(p, transform);
+            //draw_shape(p, transform);
+            draw_shape(p, view);
         }
         
         glutSwapBuffers();
@@ -242,6 +285,10 @@ private:
     }
 
 private:
+    MouseDispatcher mouse_dispatcher_;
+    Camera          camera_;
+    MouseState      mouse_state_;
+
     Matrix BGMatrix_;
     Matrix ProjectionMatrix_;
     const GLfloat LightSourcePosition_[4];
@@ -306,4 +353,11 @@ void Screen::on_idle(std::function<void (float)> f) {
 }
 
 //>>>>>>>>>> Screen
+
+extern "C" {
+void addMouseEvent(int which, int kind, int x, int y) {
+    printf("%d, %d: %d, %d\n", which, kind, x, y);
+    imp_->on_mouse(which, kind, x, y);
+}
+}
 

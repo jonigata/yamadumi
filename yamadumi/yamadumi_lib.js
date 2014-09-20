@@ -36,5 +36,28 @@ mergeInto(LibraryManager.library, {
                 gl.bindTexture(gl.TEXTURE_2D, texture);
             }
         }
+    },
+    initMouse: function() {
+        var addMouseEventNative = cwrap(
+            'addMouseEvent', 'v', ['number', 'number', 'number', 'number']);
+        var canvas = $('#canvas');
+        canvas.bind('mousedown', function(e) {
+            var offset = $(this).offset(),
+                left = e.pageX - offset.left,
+                top = e.pageY - offset.top;
+            addMouseEventNative(e.which, 0, left, top);
+        });
+        canvas.bind('mousemove', function(e) {
+            var offset = $(this).offset(),
+                left = e.pageX - offset.left,
+                top = e.pageY - offset.top;
+            addMouseEventNative(e.which, 1, left, top);
+        });
+        canvas.bind('mouseup', function(e) {
+            var offset = $(this).offset(),
+                left = e.pageX - offset.left,
+                top = e.pageY - offset.top;
+            addMouseEventNative(e.which, 2, left, top);
+        });
     }
 });

@@ -1,0 +1,8 @@
+*.o
+.DS_Store
+._*
+.apdisk
+hello.js
+yamadumi.js
+mqo_viewer.js
+.fuse*
