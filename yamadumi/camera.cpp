@@ -81,7 +81,7 @@ public:
     CameraZoomer() { reset(); }
 
     void reset() {
-        distance_ = 5.0f;
+        distance_ = 15.0f;
     }
 
     void on_down(const Point& pos) {
@@ -125,7 +125,7 @@ public:
     }
 
     void reset() {
-        offset_ = Vector(0, 2, 0);
+        offset_ = Vector(0, 0, 0);
     }
 
     void set_angle(float pan, float tilt) {

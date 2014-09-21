@@ -14,7 +14,6 @@ public:
     RoomShader() { build(); }
 
     void build() {
-
         GLuint v = create_vertex_shader();
         GLuint f = create_fragment_shader();
 
@@ -23,7 +22,7 @@ public:
         glAttachShader(program_, v);
         glAttachShader(program_, f);
         glBindAttribLocation(program_, 0, "Position");
-        glBindAttribLocation(program_, 3, "SrcUv");
+        glBindAttribLocation(program_, 1, "SrcColor");
 
         glLinkProgram(program_);
         char msg[512];
@@ -31,44 +30,47 @@ public:
         printf("info: %s\n", msg);
 
         /* Get the locations of the uniforms so we can access them */
-        Sampler_location_ =
-            glGetUniformLocation(program_, "Texture2D");            
         ModelViewProjectionMatrix_location_ =
             glGetUniformLocation(program_, "ModelViewProjectionMatrix");
     }
 
-    void attach(const GLfloat light_source_position[4]) {
-        glEnable(GL_CULL_FACE);
-        glEnable(GL_DEPTH_TEST);
-
+    void attach() {
         /* Enable the shaders */
         glUseProgram(program_);
-
-        /* Set the sampler */
-        glUniform1i(Sampler_location_, 0);
     }
 
-    void bind() {
+    void bind(
+        const Matrix& model_matrix,
+        const Matrix& view_matrix,
+        const Matrix& projection_matrix) {
+
+        /* Translate and rotate the shape */
+        Matrix model_view = view_matrix * model_matrix;
+
+        /* Create and set the ModelViewProjectionMatrix */
+        Matrix model_view_projection =
+            projection_matrix * model_view;
+
         glUniformMatrix4fv(
             ModelViewProjectionMatrix_location_,
             1,
             GL_FALSE,
-            LocalMatrix_.m);
+            model_view_projection.m);
     }
-    
+
 private:
     GLuint create_vertex_shader() {
         static const char vertex_shader_source[] = R"(
 attribute vec3 Position;
-attribute vec2 SrcUv;
+attribute vec4 SrcColor;
 
 uniform mat4 ModelViewProjectionMatrix;
 
-varying vec2 Uv;
+varying vec4 Color;
 
 void main(void)
 {
-    Uv = SrcUv;
+    Color = SrcColor;
     gl_Position = ModelViewProjectionMatrix * vec4(Position, 1.0);
 }
 )";
@@ -88,12 +90,11 @@ void main(void)
     GLuint create_fragment_shader() {
         static const char fragment_shader_source[] = R"(
 precision mediump float;
-varying vec2 Uv;
-uniform sampler2D Texture2D;
+varying vec4 Color;
 
 void main(void)
 {
-    gl_FragColor = texture2D(Texture2D, Uv);
+    gl_FragColor = Color;
 }
 )";
         const char* p = fragment_shader_source;
@@ -111,10 +112,7 @@ void main(void)
 
     GLuint program_;
     
-    GLuint Sampler_location_;
     GLuint ModelViewProjectionMatrix_location_;
-
-    Matrix LocalMatrix_;
 
 };
 

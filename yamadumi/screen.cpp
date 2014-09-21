@@ -11,6 +11,7 @@
 #include "geometry.hpp"
 #include "shader.hpp"
 #include "bg.hpp"
+#include "room.hpp"
 #include "mouse_dispatcher.hpp"
 #include "camera.hpp"
 
@@ -32,6 +33,7 @@ public:
 
         init(argc, argv, title);
         bg_ = std::make_shared<BG>();
+        room_ = std::make_shared<Room>();
 
         mouse_dispatcher_.add_acceptor(&camera_, 0);
     }
@@ -136,9 +138,13 @@ public:
             focal_point,
             Vector(0, 1, 0));
 
+        room_shader_->attach();
+        draw_room(view);
+
         /* Draw the shapes */
+        //figure_shader_->attach(LightSourcePosition_);
         for(shape_ptr& p : shapes_) {
-            draw_shape(p, view);
+            //draw_shape(p, view);
         }
         
         glutSwapBuffers();
@@ -180,6 +186,7 @@ private:
         glutSpecialFunc([](int s, int c, int m){ imp_->special(s, c, m); });
 
         figure_shader_.reset(new FigureShader);
+        room_shader_.reset(new RoomShader);
     }
 
     void draw_bg() {
@@ -213,6 +220,17 @@ private:
         shape->render();
     }
 
+    void draw_room(const Matrix& view_matrix) {
+        glEnable(GL_CULL_FACE);
+        glDisable(GL_DEPTH_TEST);
+
+        room_shader_->bind(
+            Matrix::identity(),
+            view_matrix,
+            ProjectionMatrix_);
+        room_->render();
+    }
+
 private:
     MouseDispatcher mouse_dispatcher_;
     Camera          camera_;
@@ -223,8 +241,10 @@ private:
     GLfloat view_rot_[3];
 
     std::unique_ptr<FigureShader> figure_shader_;
+    std::unique_ptr<RoomShader> room_shader_;
 
     std::shared_ptr<BG> bg_;
+    std::shared_ptr<Room> room_;
     std::vector<shape_ptr> shapes_;
     std::function<void (float)> on_idle_;
 

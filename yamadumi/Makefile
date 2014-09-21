@@ -1,6 +1,6 @@
 .SUFFIXES : .cpp .o .js
 
-OBJS = yamadumi.o screen.o mqoreader.o figure.o camera.o mouse_dispatcher.o camera.o
+OBJS = yamadumi.o screen.o mqoreader.o figure.o camera.o mouse_dispatcher.o camera.o room.o
 JSS = yamadumi_lib.js 
 
 yamadumi.js: $(OBJS) $(JSS)
@@ -9,7 +9,7 @@ yamadumi.js: $(OBJS) $(JSS)
 .cpp.o:
 	emcc -std=c++11 $< -o $@
 
-screen.o : screen.cpp bg.hpp
+screen.o : screen.cpp bg.hpp shader.hpp
 
 clean:
 	rm -f $(OBJS) yamadumi.js
