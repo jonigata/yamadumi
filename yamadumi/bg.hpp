@@ -31,7 +31,7 @@ public:
     }
 
     void add_vertex(float x, float y){
-        Vertex dst;
+        Piece::Vertex dst;
         dst.position = Vector(x, y, 0);
         dst.normal = Vector(0, 0, 1);
         dst.diffuse = piece_.color;

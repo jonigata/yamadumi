@@ -10,21 +10,21 @@
 #include <vector>
 #include <string>
 
-struct Vertex {
-    Vector      position;
-    Vector      normal;
-    Color       diffuse;
-    float       u;
-    float       v;
-    Vertex() {}
-    Vertex(const Vector& p, const Vector& n, const Color& c) {
-        position = p;
-        normal = n;
-        diffuse = c;
-    }
-};
-
 struct Piece {
+    struct Vertex {
+        Vector      position;
+        Vector      normal;
+        Color       diffuse;
+        float       u;
+        float       v;
+        Vertex() {}
+        Vertex(const Vector& p, const Vector& n, const Color& c) {
+            position = p;
+            normal = n;
+            diffuse = c;
+        }
+    };
+
     typedef uint16_t Index;
 
     std::vector<Vertex>     vertex_source;

@@ -8,6 +8,8 @@
 #include "jslib.hpp"
 #include "texture.hpp"
 
+const float MIKU_SCALE = 0.02f;
+
 void start(int argc, const char *argv[]) {
     initMouse();
     initTextureVault();
@@ -24,7 +26,7 @@ void start(int argc, const char *argv[]) {
     mqo_reader::read_mqo(ifs, doc);
 
     figure_ptr figure(new Figure);
-    figure->build_from_mqo(doc, 0.1f, yellow);
+    figure->build_from_mqo(doc, MIKU_SCALE, yellow);
 
     screen.add_shape(figure);
 

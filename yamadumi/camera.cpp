@@ -81,7 +81,7 @@ public:
     CameraZoomer() { reset(); }
 
     void reset() {
-        distance_ = 25.0f;
+        distance_ = 5.0f;
     }
 
     void on_down(const Point& pos) {
@@ -91,7 +91,7 @@ public:
     void on_drag(const Point& pos) {
         int zdelta = pos.y - previous_.y;
 
-        distance_ += zdelta * 0.05f;
+        distance_ -= zdelta * 0.05f;
         previous_ = pos;
     }
         
@@ -125,7 +125,7 @@ public:
     }
 
     void reset() {
-        offset_ = Vector(0, 10, 0);
+        offset_ = Vector(0, 2, 0);
     }
 
     void set_angle(float pan, float tilt) {

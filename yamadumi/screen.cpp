@@ -116,16 +116,6 @@ public:
             perspective_fov_rh(
                 DEG2RAD(60.0), width / (float)height, 1.0, 1024.0);
 
-#if 0
-        BGMatrix_ =
-            Matrix::translate(-2.0, 0, 0) *
-            Matrix::scale(width, height, 1);
-#else
-        BGMatrix_ =
-            Matrix::scale(2.0, 2.0, 1.0) * 
-            Matrix::translate(-0.5, -0.5, 0);
-#endif
-
         /* Set the viewport */
         glViewport(0, 0, (GLint) width, (GLint) height);
     }
@@ -135,6 +125,7 @@ public:
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         //glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 
+        figure_shader_->attach(LightSourcePosition_);
         draw_bg();
 
         // view matrix
@@ -144,20 +135,9 @@ public:
             view_point,
             focal_point,
             Vector(0, 1, 0));
-        Matrix transform = Matrix::identity();
-        transform *= Matrix::translate(0, -10, -40);
-        transform *= Matrix::rotate(2 * M_PI * view_rot_[0] / 360.0, 1, 0, 0);
-        transform *= Matrix::rotate(2 * M_PI * view_rot_[1] / 360.0, 0, 1, 0);
-        transform *= Matrix::rotate(2 * M_PI * view_rot_[2] / 360.0, 0, 0, 1);
-
-        //printf("%f, %f, %f\n", view_point.x, view_point.y, view_point.z);
-        //printf("%f, %f, %f\n", focal_point.x, focal_point.y, focal_point.z);
-
-        //transform *= Matrix::translate(0, -10, -40);
 
         /* Draw the shapes */
         for(shape_ptr& p : shapes_) {
-            //draw_shape(p, transform);
             draw_shape(p, view);
         }
         
@@ -199,88 +179,37 @@ private:
         glutDisplayFunc([](){ imp_->draw(); });
         glutSpecialFunc([](int s, int c, int m){ imp_->special(s, c, m); });
 
-        GLuint v = create_vertex_shader();
-        GLuint f = create_fragment_shader();
-
-        /* Create and link the shader program */
-        GLuint program = glCreateProgram();
-        glAttachShader(program, v);
-        glAttachShader(program, f);
-        glBindAttribLocation(program, 0, "Position");
-        glBindAttribLocation(program, 1, "Normal");
-        glBindAttribLocation(program, 2, "SrcColor");
-        glBindAttribLocation(program, 3, "SrcUv");
-
-        glLinkProgram(program);
-        char msg[512];
-        glGetProgramInfoLog(program, sizeof msg, NULL, msg);
-        printf("info: %s\n", msg);
-
-        /* Enable the shaders */
-        glUseProgram(program);
-
-        /* sampler */
-        glUniform1i(glGetUniformLocation(program, "Texture2D"), 0);
-
-        /* Get the locations of the uniforms so we can access them */
-        ModelViewProjectionMatrix_location_ =
-            glGetUniformLocation(program, "ModelViewProjectionMatrix");
-        NormalMatrix_location_ =
-            glGetUniformLocation(program, "NormalMatrix");
-        LightSourcePosition_location_ =
-            glGetUniformLocation(program, "LightSourcePosition");
-        MaterialColor_location_ =
-            glGetUniformLocation(program, "MaterialColor");
-
-        /* Set the LightSourcePosition uniform which is constant throught the program */
-        glUniform4fv(LightSourcePosition_location_, 1, LightSourcePosition_);
+        figure_shader_.reset(new FigureShader);
     }
 
     void draw_bg() {
         glDisable(GL_CULL_FACE);
         glDisable(GL_DEPTH_TEST);
 
-        glUniformMatrix4fv(
-            ModelViewProjectionMatrix_location_,
-            1,
-            GL_FALSE,
-            BGMatrix_.m);
+        Matrix bg_matrix =
+            Matrix::scale(2.0, 2.0, 1.0) * 
+            Matrix::translate(-0.5, -0.5, 0);
+
+        Color c = {1.0, 1.0, 1.0, 1.0};
+        
+        figure_shader_->bind(
+            c,
+            Matrix::identity(),
+            Matrix::identity(),
+            bg_matrix);
         bg_->render();
     }
 
-    void draw_shape(const shape_ptr& shape, const Matrix& transform)
+    void draw_shape(const shape_ptr& shape, const Matrix& view_matrix)
     {
         glEnable(GL_CULL_FACE);
         glEnable(GL_DEPTH_TEST);
 
-        /* Set the material color */
-        glUniform4fv(
-            MaterialColor_location_, 1, shape->get_material_color().rgba);
-
-        /* Translate and rotate the shape */
-        Matrix model_view = transform * shape->get_transform();
-
-        /* Create and set the ModelViewProjectionMatrix */
-        Matrix model_view_projection = ProjectionMatrix_ * model_view;
-        glUniformMatrix4fv(
-            ModelViewProjectionMatrix_location_,
-            1,
-            GL_FALSE,
-            model_view_projection.m);
-
-        /*
-         * Create and set the NormalMatrix. It's the inverse transpose of the
-         * ModelView matrix.
-         */
-        Matrix normal_matrix = model_view;
-        normal_matrix.invert();
-        normal_matrix.transpose();
-        glUniformMatrix4fv(
-            NormalMatrix_location_,
-            1,
-            GL_FALSE,
-            normal_matrix.m);
-
+        figure_shader_->bind(
+            shape->get_material_color(),
+            shape->get_transform(),
+            view_matrix,
+            ProjectionMatrix_);
         shape->render();
     }
 
@@ -289,17 +218,11 @@ private:
     Camera          camera_;
     MouseState      mouse_state_;
 
-    Matrix BGMatrix_;
     Matrix ProjectionMatrix_;
     const GLfloat LightSourcePosition_[4];
     GLfloat view_rot_[3];
 
-    GLuint ModelViewProjectionMatrix_location_;
-    GLuint NormalMatrix_location_;
-    GLuint LightSourcePosition_location_;
-    GLuint MaterialColor_location_;
-
-    GLuint sampler_;
+    std::unique_ptr<FigureShader> figure_shader_;
 
     std::shared_ptr<BG> bg_;
     std::vector<shape_ptr> shapes_;
@@ -356,7 +279,7 @@ void Screen::on_idle(std::function<void (float)> f) {
 
 extern "C" {
 void addMouseEvent(int which, int kind, int x, int y) {
-    printf("%d, %d: %d, %d\n", which, kind, x, y);
+    //printf("%d, %d: %d, %d\n", which, kind, x, y);
     imp_->on_mouse(which, kind, x, y);
 }
 }

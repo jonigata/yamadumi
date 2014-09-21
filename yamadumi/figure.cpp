@@ -144,7 +144,7 @@ public:
                 for (auto& j: c) {
                     const auto& src = obj.vertices[j.first.index];
 
-                    Vertex dst;
+                    Piece::Vertex dst;
                     dst.position = Vector(
                         src.x * scale,
                         src.y * scale,
@@ -180,9 +180,9 @@ public:
                 m.index_source.push_back(k1);
                 m.index_source.push_back(k2);
 
-                Vertex& v0 = m.vertex_source[k0];
-                Vertex& v1 = m.vertex_source[k1];
-                Vertex& v2 = m.vertex_source[k2];
+                Piece::Vertex& v0 = m.vertex_source[k0];
+                Piece::Vertex& v1 = m.vertex_source[k1];
+                Piece::Vertex& v2 = m.vertex_source[k2];
                 Vector normal = cross(
                     v1.position - v0.position,
                     v2.position - v0.position);
@@ -213,7 +213,7 @@ private:
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m.ibo);
 
         /* Set up the position of the attributes in the vertex buffer object */
-        int stride = sizeof(Vertex);
+        int stride = sizeof(Piece::Vertex);
         const float* p = 0;
         glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, stride, p + 0);
         glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, stride, p + 3);
@@ -278,7 +278,7 @@ private:
     }
 
     void build_piece( Piece& m ) {
-        const std::vector<Vertex>& vsrc = m.vertex_source;
+        const std::vector<Piece::Vertex>& vsrc = m.vertex_source;
         const std::vector<Index>&  isrc = m.index_source;
 
         if( vsrc.empty() || isrc.empty() ) {
