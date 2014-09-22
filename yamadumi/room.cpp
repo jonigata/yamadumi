@@ -46,6 +46,7 @@ Room::Room()
     c.rgba[2] = 0.7;
     c.rgba[3] = 0.7;
 
+/*
     Vertex edge_vertices[8];
     edge_vertices[0](-5.0f, -5.0f, -5.0f, c);
     edge_vertices[1]( 5.0f, -5.0f, -5.0f, c);
@@ -72,6 +73,7 @@ Room::Room()
         2, 5,
         3, 4
     };
+*/
         
     glGenBuffers(1, &this->face_vbo);
     glBindBuffer(GL_ARRAY_BUFFER, this->face_vbo);

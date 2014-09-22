@@ -32,8 +32,10 @@ public:
 private:
     GLuint face_vbo;
     GLuint face_ibo;
+/*
     GLuint edge_vbo;
     GLuint edge_ibo;
+*/
 
 };
 

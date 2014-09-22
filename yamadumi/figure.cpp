@@ -22,7 +22,7 @@ private:
     typedef std::vector<Piece> pieces_type;
 
 public:
-    FigureImp() {}
+    FigureImp() { transform_ = Matrix::identity(); }
     ~FigureImp() { clear(); }
 
     void clear() {
@@ -39,8 +39,11 @@ public:
         }
     }
 
+    void set_transform(const Matrix& m) {
+        transform_ = m;
+    }
     Matrix get_transform() {
-        return Matrix::identity();
+        return transform_;
     }
     Color get_material_color() {
         return Color{ {1.0, 1.0, 0, 1.0} };
@@ -328,7 +331,8 @@ private:
     }
 
 private:
-    std::vector<Piece> pieces_;
+    std::vector<Piece>  pieces_;
+    Matrix              transform_;
 
 };
 
@@ -356,6 +360,12 @@ Figure::~Figure() {
 // render
 void Figure::render() {
     imp_->render();
+}
+
+//****************************************************************
+// set_transform
+void Figure::set_transform(const Matrix& m) {
+    imp_->set_transform(m);
 }
 
 //****************************************************************

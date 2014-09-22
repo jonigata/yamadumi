@@ -17,6 +17,7 @@ public:
     ~Figure();
 
     void render();
+    void set_transform(const Matrix&);
     Matrix get_transform();
     Color get_material_color();
 

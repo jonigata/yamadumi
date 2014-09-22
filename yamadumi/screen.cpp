@@ -142,9 +142,9 @@ public:
         draw_room(view);
 
         /* Draw the shapes */
-        //figure_shader_->attach(LightSourcePosition_);
+        figure_shader_->attach(LightSourcePosition_);
         for(shape_ptr& p : shapes_) {
-            //draw_shape(p, view);
+            draw_shape(p, view);
         }
         
         glutSwapBuffers();
@@ -197,7 +197,7 @@ private:
             Matrix::scale(2.0, 2.0, 1.0) * 
             Matrix::translate(-0.5, -0.5, 0);
 
-        Color c = {1.0, 1.0, 1.0, 1.0};
+        Color c {{1.0, 1.0, 1.0, 1.0}};
         
         figure_shader_->bind(
             c,

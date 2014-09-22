@@ -127,18 +127,16 @@ struct Matrix {
 
     Matrix(){}
     Matrix(
-        float e00,float e01,float e02,float e03,
-        float e10,float e11,float e12,float e13,
-        float e20,float e21,float e22,float e23,
-        float e30,float e31,float e32,float e33)
-    {
+        float e00, float e01, float e02, float e03,
+        float e10, float e11, float e12, float e13,
+        float e20, float e21, float e22, float e23,
+        float e30, float e31, float e32, float e33) {
         m00 = e00; m01 = e01; m02 = e02; m03 = e03; 
         m10 = e10; m11 = e11; m12 = e12; m13 = e13; 
         m20 = e20; m21 = e21; m22 = e22; m23 = e23; 
         m30 = e30; m31 = e31; m32 = e32; m33 = e33;
     }
-    Matrix(const Vector& x, const Vector& y, const Vector& z)
-    {
+    Matrix(const Vector& x, const Vector& y, const Vector& z) {
         m00 = x.x; m01 = x.y; m02 = x.z; m03 = 0; 
         m10 = y.x; m11 = y.y; m12 = y.z; m13 = 0; 
         m20 = z.x; m21 = z.y; m22 = z.z; m23 = 0; 
@@ -166,20 +164,18 @@ struct Matrix {
         return t;
     }
 
-    static Matrix translate(float x, float y, float z)
-    {
-        return Matrix{ 1, 0, 0, 0,  0, 1, 0, 0,  0, 0, 1, 0,  x, y, z, 1 };
+    static Matrix translate(float x, float y, float z) {
+        return Matrix { 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, x, y, z, 1 };
     }
 
-    static Matrix rotate(float angle, float x, float y, float z)
-    {
+    static Matrix rotate(float angle, float x, float y, float z) {
         float s = sin(angle);
         float c = cos(angle);
 
         Matrix r {
-            x * x * (1 - c) + c,     y * x * (1 - c) + z * s, x * z * (1 - c) - y * s, 0,
-            x * y * (1 - c) - z * s, y * y * (1 - c) + c,     y * z * (1 - c) + x * s, 0,
-            x * z * (1 - c) + y * s, y * z * (1 - c) - x * s, z * z * (1 - c) + c,     0,
+            x * x *(1 - c)+ c, y * x *(1 - c)+ z * s, x * z *(1 - c)- y * s, 0,
+            x * y *(1 - c)- z * s, y * y *(1 - c)+ c, y * z *(1 - c)+ x * s, 0,
+            x * z *(1 - c)+ y * s, y * z *(1 - c)- x * s, z * z *(1 - c)+ c, 0,
             0, 0, 0, 1
         };
 
@@ -377,26 +373,23 @@ invert(Matrix& sm)
 inline void Matrix::invert() { ::invert(*this); }
 
 inline void
-transpose(Matrix& m)
-{
+transpose(Matrix& m) {
     m = Matrix {
-      m[0], m[4], m[8],  m[12],
-      m[1], m[5], m[9],  m[13],
-      m[2], m[6], m[10], m[14],
-      m[3], m[7], m[11], m[15]
+        m[0], m[4], m[8], m[12],
+        m[1], m[5], m[9], m[13],
+        m[2], m[6], m[10], m[14],
+        m[3], m[7], m[11], m[15]
     };
 }
 
 inline void Matrix::transpose() { ::transpose(*this); }
 
-inline float pi()
-{
+inline float pi() {
     return  3.141592f;
 }
 
 inline float
-DEG2RAD(float theta)
-{
+DEG2RAD(float theta) {
     return theta / 180.0f * pi();
 }
 
@@ -406,11 +399,10 @@ unproject(
     const Matrix& proj,
     float w,
     float h,
-    const Vector& p)
-{
+    const Vector& p) {
     Vector v;
-    v.x =  (p.x * 2.0f / w - 1) / proj.m00;
-    v.y = -(p.y * 2.0f / h - 1) / proj.m11;
+    v.x =(p.x * 2.0f / w - 1)/ proj.m00;
+    v.y = -(p.y * 2.0f / h - 1)/ proj.m11;
     v.z = 1;
     v = normalize(v);
 
@@ -429,18 +421,27 @@ test_ray_sphere(
     const Vector& center,
     float radius,
     float& t,
-    Vector& q)
-{
+    Vector& q) {
     Vector m = org - center;
     float b = dot(m, dir);
-    float c = dot(m, m) - radius * radius;
-    if(0.0f < c && 0.0f < b) { return false; }
+    float c = dot(m, m)- radius * radius;
+    if (0.0f <c && 0.0f <b) { return false; }
     float discr = b*b - c;
-    if(discr < 0.0f) { return false; }
+    if (discr <0.0f) { return false; }
     t = -b - sqrtf(discr);
-    if(t < 0.0f) t = 0.0f;
+    if (t <0.0f)t = 0.0f;
     q = org + dir * t;
     return true;
+}
+
+template <class OS>
+OS& operator<<(OS& os, const Matrix& m) {
+    os << "{ ";
+    for (int i = 0 ; i < 16 ; i++) {
+        os << m[i] << ", ";
+    }
+    os << " }";
+    return os;
 }
 
 ////////////////////////////////////////////////////////////////
