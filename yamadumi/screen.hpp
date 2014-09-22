@@ -14,6 +14,7 @@ public:
     ~Screen();
 
     void add_shape(shape_ptr);
+    Vector make_view_point();
     void on_idle(std::function<void (float)>);
     void do_main_loop();
 

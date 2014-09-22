@@ -170,6 +170,9 @@ public:
         }
     }
 
+    Vector make_view_point() {
+        return camera_.make_view_point();
+    }
 
 private:
     void init(int argc, const char** argv, const char* title) {
@@ -293,6 +296,12 @@ void Screen::do_main_loop() {
 void Screen::on_idle(std::function<void (float)> f) {
     printf("Screen::on_idle\n");
     imp_->on_idle(f);
+}
+
+//****************************************************************
+// make_view_point
+Vector Screen::make_view_point() {
+    return imp_->make_view_point();
 }
 
 //>>>>>>>>>> Screen

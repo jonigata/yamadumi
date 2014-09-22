@@ -164,11 +164,20 @@ public:
         body_ptr e(v);
         e->teleport(o);
         e->set_auto_freezing(false);
-        e->set_global_force(vector_type(0, -9.8, 0));
         bodies_.push_back(e);
         models_.push_back(e);
         world_->add_body(e.get());
+
+        set_gravity(vector_type(0, -9.8, 0));
+
         return e;
+    }
+
+    void set_gravity(const vector_type& v) {
+        for (auto body: bodies_) {
+            body->set_frozen(false);
+            body->set_global_force(v);
+        }
     }
 
 private:

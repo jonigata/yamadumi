@@ -98,6 +98,14 @@ inline Vector operator*=(Vector& lhs, float rhs) {
     return lhs;
 }
 
+inline bool operator==(const Vector& lhs, const Vector& rhs) {
+    return lhs.x == rhs.x && lhs.y == rhs.y && lhs.z == rhs.z;
+}
+
+inline bool operator!=(const Vector& lhs, const Vector& rhs) {
+    return !(lhs == rhs);
+}
+
 inline Vector
 cross(const Vector& u, const Vector& v) {
     Vector r;
