@@ -4,6 +4,10 @@
     <meta charset="utf-8">
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
     <title>Emscripten-Generated Code</title>
+    <link rel="stylesheet" href="//code.jquery.com/ui/1.11.1/themes/smoothness/jquery-ui.css">
+    <script src="//code.jquery.com/jquery-1.10.2.js"></script>
+    <script src="//code.jquery.com/ui/1.11.1/jquery-ui.js"></script>
+
     <style>
       .emscripten { padding-right: 0; margin-left: auto; margin-right: auto; display: block; }
       textarea.emscripten { font-family: monospace; width: 80%; }
@@ -11,9 +15,27 @@
       div.emscripten_border { border: 1px solid black; }
       /* the canvas *must not* have any border or padding, or mouse coords will be wrong */
       canvas.emscripten { border: 0px none; }
+      .slider {
+        width: 320px;
+        margin-left: 16px;
+        margin-top: 8px;
+        margin-bottom: 8px;
+      }
     </style>
+
+    <script>
+      $(function() {
+      });
+    </script>
   </head>
   <body>
+    <table>
+      <tr><td><div id="stretch-factor" class="slider"></div></td><td id="stretch-factor-value">0.7</td><td>伸縮性</td></tr>
+      <tr><td><div id="restore-factor" class="slider"></div></td><td id="restore-factor-value">1.0</td><td>復元性</td></tr>
+      <tr><td><div id="friction" class="slider"></div></td><td id="friction-value">0.3</td><td>摩擦</td></tr>
+    </table>
+    
+    <p>スペースキーで数が増えます</p>
     <hr/>
     <div class="emscripten" id="status">Downloading...</div>
     <div class="emscripten">
@@ -34,7 +56,6 @@
     <hr/>
     <textarea class="emscripten" id="output" rows="8"></textarea>
     <hr>
-    <script src="https://code.jquery.com/jquery-2.1.1.min.js"></script>
     <script>
       // connect to canvas
       var Module = {

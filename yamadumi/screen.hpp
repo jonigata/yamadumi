@@ -15,6 +15,9 @@ public:
 
     void add_shape(shape_ptr);
     Vector make_view_point();
+    void on_slider(std::function<void (int, float)>);
+    void on_keyboard(std::function<void (int)>);
+    void on_special(std::function<void (int,int,int)>);
     void on_idle(std::function<void (float)>);
     void do_main_loop();
 

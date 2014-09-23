@@ -27,9 +27,7 @@ public:
     ////////////////////////////////////////////////////////////////
     // public interface
     ScreenImp(int argc, const char** argv, const char* title)
-        :
-        LightSourcePosition_ {5.0, 5.0, 10.0, 1.0},
-        view_rot_ { 20.0, 30.0, 0.0 } {
+        : LightSourcePosition_ {5.0, 5.0, 10.0, 1.0} {
 
         init(argc, argv, title);
         bg_ = std::make_shared<BG>();
@@ -42,7 +40,7 @@ public:
         mouse_dispatcher_.remove_acceptor(&camera_);
     }
 
-    void on_mouse(int which, int kind, int x, int y) {
+    void mouse(int which, int kind, int x, int y) {
         bool* b = nullptr;
         switch(which) {
             case 1: b = &mouse_state_.lbutton; break;
@@ -64,6 +62,18 @@ public:
         }
         mouse_state_.position = Point(x, y);
         mouse_dispatcher_.on_mouse_message(mouse_state_);
+    }
+
+    void on_slider(std::function<void (int, float)> f) {
+        on_slider_ = f;
+    }
+
+    void on_keyboard(std::function<void (int)> f) {
+        on_keyboard_ = f;
+    }
+
+    void on_special(std::function<void (int,int,int)> f) {
+        on_special_ = f;
     }
 
     void on_idle(std::function<void (float)> f) {
@@ -150,24 +160,16 @@ public:
         glutSwapBuffers();
     }
 
+    void slider(int which, float value) {
+        on_slider_(which, value);
+    }
+
+    void keyboard(int code) {
+        on_keyboard_(code);
+    }
+
     void special(int special, int crap, int morecrap) {
-        switch (special) {
-            case GLUT_KEY_LEFT:
-                view_rot_[1] += 5.0;
-                break;
-            case GLUT_KEY_RIGHT:
-                view_rot_[1] -= 5.0;
-                break;
-            case GLUT_KEY_UP:
-                view_rot_[0] += 5.0;
-                break;
-            case GLUT_KEY_DOWN:
-                view_rot_[0] -= 5.0;
-                break;
-            case GLUT_KEY_F11:
-                glutFullScreen();
-                break;
-        }
+        on_special_(special, crap, morecrap);
     }
 
     Vector make_view_point() {
@@ -186,6 +188,7 @@ private:
         glutIdleFunc ([](){ imp_->idle(); });
         glutReshapeFunc([](int w, int h) { imp_->reshape(w, h); });
         glutDisplayFunc([](){ imp_->draw(); });
+        glutKeyboardFunc([](unsigned char c, int, int){ imp_->keyboard(c); });
         glutSpecialFunc([](int s, int c, int m){ imp_->special(s, c, m); });
 
         figure_shader_.reset(new FigureShader);
@@ -241,7 +244,6 @@ private:
 
     Matrix ProjectionMatrix_;
     const GLfloat LightSourcePosition_[4];
-    GLfloat view_rot_[3];
 
     std::unique_ptr<FigureShader> figure_shader_;
     std::unique_ptr<RoomShader> room_shader_;
@@ -249,6 +251,9 @@ private:
     std::shared_ptr<BG> bg_;
     std::shared_ptr<Room> room_;
     std::vector<shape_ptr> shapes_;
+    std::function<void (int,float)> on_slider_;
+    std::function<void (int)> on_keyboard_;
+    std::function<void (int, int, int)> on_special_;
     std::function<void (float)> on_idle_;
 
 };
@@ -292,6 +297,24 @@ void Screen::do_main_loop() {
 }
 
 //****************************************************************
+// on_slider
+void Screen::on_slider(std::function<void (int, float)> f) {
+    imp_->on_slider(f);
+}
+
+//****************************************************************
+// on_keyboard
+void Screen::on_keyboard(std::function<void (int)> f) {
+    imp_->on_keyboard(f);
+}
+
+//****************************************************************
+// on_special
+void Screen::on_special(std::function<void (int,int,int)> f) {
+    imp_->on_special(f);
+}
+
+//****************************************************************
 // on_idle
 void Screen::on_idle(std::function<void (float)> f) {
     printf("Screen::on_idle\n");
@@ -309,7 +332,11 @@ Vector Screen::make_view_point() {
 extern "C" {
 void addMouseEvent(int which, int kind, int x, int y) {
     //printf("%d, %d: %d, %d\n", which, kind, x, y);
-    imp_->on_mouse(which, kind, x, y);
+    imp_->mouse(which, kind, x, y);
+}
+
+void addSliderEvent(int which, float value) {
+    imp_->slider(which, value);
 }
 }
 

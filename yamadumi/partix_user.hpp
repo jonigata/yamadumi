@@ -107,6 +107,10 @@ typedef std::shared_ptr<softvolume_type>        softvolume_ptr;
 class PartixWorld {
 public:
     PartixWorld() {
+        stretch_factor_ = 0.7;
+        restore_factor_ = 1.0;
+        friction_ = 0.3;
+
         build();
     }
 
@@ -154,10 +158,10 @@ public:
         softvolume_type* v = make_volume_body(MIKU_SCALE*100);
 
         // 硬さ、摩擦
-        v->set_restore_factor( 0.3f );
-        v->set_stretch_factor( 0.7f );
+        v->set_stretch_factor(stretch_factor_);
+        v->set_restore_factor(restore_factor_);
         for (auto& p: v->get_mesh()->get_points()) {
-            p.friction = 0.8f;
+            p.friction = friction_;
         }
                                 
         // 登録
@@ -174,10 +178,39 @@ public:
     }
 
     void set_gravity(const vector_type& v) {
-        for (auto body: bodies_) {
+        for (auto body: models_) {
             body->set_frozen(false);
             body->set_global_force(v);
         }
+    }
+
+    void set_stretch_factor(float value) {
+        stretch_factor_ = value;
+        for (auto body: models_) {
+            auto v = std::dynamic_pointer_cast<softvolume_type>(body);
+            v->set_stretch_factor(value);
+        }
+        printf("stretch_factor: %f\n", value);
+    }
+
+    void set_restore_factor(float value) {
+        restore_factor_ = value;
+        for (auto body: models_) {
+            auto v = std::dynamic_pointer_cast<softvolume_type>(body);
+            v->set_restore_factor(value);
+        }
+        printf("restore_factor: %f\n", value);
+    }
+
+    void set_friction(float value) {
+        friction_ = value;
+        for (auto body: models_) {
+            auto v = std::dynamic_pointer_cast<softvolume_type>(body);
+            for (auto& p: v->get_mesh()->get_points()) {
+                p.friction = value;
+            }
+        }
+        printf("friction: %f\n", value);
     }
 
 private:
@@ -245,6 +278,10 @@ private:
     std::unique_ptr<world_type> world_;
     std::vector<body_ptr>       bodies_;    // 全部
     std::vector<body_ptr>       models_;    // figure系だけ
+
+    float stretch_factor_;
+    float restore_factor_;
+    float friction_;
     
 };
 

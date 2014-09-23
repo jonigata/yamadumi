@@ -59,5 +59,45 @@ mergeInto(LibraryManager.library, {
                 top = e.pageY - offset.top;
             addMouseEventNative(e.which, 2, left, top);
         });
+        canvas.bind('mouseleave', function(e) {
+            var offset = $(this).offset(),
+                left = e.pageX - offset.left,
+                top = e.pageY - offset.top;
+            addMouseEventNative(e.which, 2, left, top);
+        });
+    },
+    initSliders: function() {
+        var addSliderEventNative = cwrap(
+            'addSliderEvent', 'v', ['number', 'number']);
+        $("#stretch-factor").slider({
+            min: 0,
+            max: 90,
+            value: 70,
+            change: function(e, ui) {
+                console.log(ui.value);
+                $('#stretch-factor-value').text(ui.value / 100.0);
+                addSliderEventNative(0, ui.value / 100.0);
+            }
+        });
+        $("#restore-factor").slider({
+            min: 10,
+            max: 100,
+            value: 100,
+            change: function(e, ui) {
+                console.log(ui.value);
+                $('#restore-factor-value').text(ui.value / 100.0);
+                addSliderEventNative(1, ui.value / 100.0);
+            }
+        });
+        $("#friction").slider({
+            min: 0,
+            max: 90,
+            value: 30,
+            change: function(e, ui) {
+                console.log(ui.value);
+                $('#friction-value').text(ui.value / 100.0);
+                addSliderEventNative(2, ui.value / 100.0);
+            }
+        });
     }
 });

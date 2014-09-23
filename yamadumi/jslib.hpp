@@ -5,6 +5,7 @@
 
 extern "C" {
 void initMouse();
+void initSliders();
 void initTextureVault();
 void loadTexture(const char*);
 void bindTexture(const char*);
